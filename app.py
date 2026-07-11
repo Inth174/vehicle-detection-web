@@ -39,8 +39,6 @@ st.set_page_config(
 ROOT_DIR = Path(__file__).resolve().parent
 MODELS_DIR = ROOT_DIR / "models"
 
-# Temp folder INSIDE the project (cross-platform, avoids hardcoded
-# Linux-only "/tmp/" which does not exist on Windows).
 TEMP_DIR = ROOT_DIR / "temp_outputs"
 TEMP_DIR.mkdir(parents=True, exist_ok=True)
 
