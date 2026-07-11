@@ -44,21 +44,6 @@ MODELS_DIR = ROOT_DIR / "models"
 TEMP_DIR = ROOT_DIR / "temp_outputs"
 TEMP_DIR.mkdir(parents=True, exist_ok=True)
 
-
-# --------------------------------------------------------------
-# Google Drive model config
-# --------------------------------------------------------------
-# Model .pt nặng hơn 100MB nên không đưa lên GitHub được -> lưu trên
-# Google Drive (chế độ chia sẻ "Anyone with the link") và tự động tải
-# về khi app khởi chạy nếu máy chưa có sẵn file.
-#
-# Cách lấy FILE ID: mở link chia sẻ Drive, nó có dạng:
-#   https://drive.google.com/file/d/1AbCdEfGhIjKlMnOpQrStUvWxYz/view?usp=sharing
-# Phần ID chính là đoạn nằm giữa "/d/" và "/view":
-#   1AbCdEfGhIjKlMnOpQrStUvWxYz
-#
-# Điền tên file model (đúng như tên sẽ dùng trong models/) và ID
-# tương ứng vào dict bên dưới. Có thể khai báo nhiều model.
 GDRIVE_MODELS = {
     "TN1_best.pt": "1_KDzlkU0Xk8VRvZXEQERWYay8OiFDvd1",
     "TN3_best.pt": "1wrQxiesfCSnJGQh-RF3CzizY5vdIADxi",
