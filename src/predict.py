@@ -71,11 +71,29 @@ class Predictor:
 
         outputs = []
 
+        # ====== BỔ SUNG ======
+        wrong_way_count = 0
+        # =====================
+
         for track in tracks:
+
             self.direction.update(
                 track["track_id"],
                 track["bbox"]
             )
+
+            direction = self.direction.get_direction(
+                track["track_id"]
+            )
+
+            is_wrong = self.direction.is_wrong_way(
+                track["track_id"]
+            )
+
+            # ====== BỔ SUNG ======
+            if is_wrong:
+                wrong_way_count += 1
+            # =====================
 
             outputs.append({
                 "track_id": track["track_id"],
@@ -83,17 +101,18 @@ class Predictor:
                 "class_id": track["class_id"],
                 "class_name": track["class_name"],
                 "confidence": track["confidence"],
-                "direction": self.direction.get_direction(
-                    track["track_id"]
-                ),
-                "wrong_way": self.direction.is_wrong_way(
-                    track["track_id"]
-                )
+                "direction": direction,
+                "wrong_way": is_wrong
             })
 
         return {
             "tracks": outputs,
             "vehicle_count": len(outputs),
+
+            # ====== BỔ SUNG ======
+            "wrong_way_count": wrong_way_count,
+            # =====================
+
             "fps": detect_result["fps"],
             "processing_time": detect_result["processing_time"]
         }
@@ -111,8 +130,10 @@ class Predictor:
 
         while True:
             ret, frame = cap.read()
+
             if not ret:
                 break
 
             yield self.predict_frame(frame)
+
         cap.release()
