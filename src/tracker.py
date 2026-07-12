@@ -6,7 +6,9 @@ DeepSORT / ByteTrack
 """
 
 from deep_sort_realtime.deepsort_tracker import DeepSort
-from supervision.tracker.byte_tracker import ByteTrack
+
+# supervision 0.26.x
+from supervision.tracker.byte_tracker.core import ByteTrack
 from supervision import Detections
 
 
@@ -119,6 +121,8 @@ class MultiObjectTracker:
         # -------------------------------------------------
 
         else:
+            import numpy as np
+
             xyxy = []
             conf = []
             cls = []
@@ -128,10 +132,14 @@ class MultiObjectTracker:
                 conf.append(det["confidence"])
                 cls.append(det["class_id"])
 
+            # Không có detection
+            if len(xyxy) == 0:
+                return []
+
             detections_sv = Detections(
-                xyxy=xyxy,
-                confidence=conf,
-                class_id=cls
+                xyxy=np.array(xyxy, dtype=np.float32),
+                confidence=np.array(conf, dtype=np.float32),
+                class_id=np.array(cls, dtype=np.int32),
             )
 
             tracks = self.tracker.update_with_detections(
