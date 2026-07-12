@@ -52,16 +52,24 @@ def draw_bbox(
 def draw_track_id(
     image,
     box,
-    track_id
+    track_id,
+    wrong_way=False
 ):
 
     x1, y1, _, _ = map(int, box)
 
+    if wrong_way:
+        text = f"ID {track_id} | WRONG WAY"
+        color = RED
+    else:
+        text = f"ID {track_id}"
+        color = WHITE
+
     put_text(
         image,
-        f"ID {track_id}",
-        (x1, y1 - 10),
-        WHITE
+        text,
+        (x1, max(20, y1 - 10)),
+        color
     )
 
 
@@ -98,7 +106,7 @@ def draw_confidence(
 
     put_text(
         image,
-        f"{confidence:.2f}",
+        f"{confidence*100:.1f}%",
         (x1, max(40, y1 - 50)),
         GREEN
     )
@@ -116,15 +124,19 @@ def draw_direction(
 
     _, _, _, y2 = map(int, box)
 
-    color = RED if wrong_way else BLUE
+    if wrong_way:
+        text = f"{direction} (WRONG)"
+        color = RED
+    else:
+        text = direction
+        color = BLUE
 
     put_text(
         image,
-        direction,
-        (box[0], y2 + 20),
+        text,
+        (int(box[0]), y2 + 20),
         color
     )
-
 
 # ==========================================================
 # Trajectory
@@ -292,7 +304,8 @@ def draw_vehicle(
         draw_track_id(
             image,
             box,
-            track_id
+            track_id,
+            wrong_way
         )
 
     if class_name is not None:
@@ -332,6 +345,14 @@ def draw_dashboard(
     vehicle_count,
     wrong_way_count,
 ):
+
+    cv2.rectangle(
+        image,
+        (10, 10),
+        (290, 140),
+        (35, 35, 35),
+        -1
+    )
 
     draw_fps(
         image,
