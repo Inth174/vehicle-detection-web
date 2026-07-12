@@ -443,14 +443,34 @@ else:
             st.subheader("🎬 Kết quả video")
             st.video(out_path)
 
-            m1, m2, m3 = st.columns(3)
-            m1.metric("Tổng số phương tiện (unique ID)", len(seen_ids))
-            m2.metric("Số phương tiện đi ngược chiều", len(wrong_way_ids))
-            m3.metric("Thời gian xử lý", f"{elapsed:.1f}s")
+            m1, m2, m3, m4 = st.columns(4)
+
+            m1.metric("🚗 Tổng phương tiện", len(seen_ids))
+            m2.metric("🚫 Xe đi ngược chiều", len(wrong_way_ids))
+            m3.metric("⚡ FPS", f"{pred['fps']:.1f}")
+            m4.metric("⏱ Thời gian", f"{elapsed:.1f}s")
 
             if class_counter:
-                st.subheader("📊 Thống kê theo loại phương tiện (theo số lượt phát hiện)")
-                st.bar_chart(pd.Series(class_counter))
+
+                st.subheader("📊 Thống kê số lượt phát hiện")
+
+                import matplotlib.pyplot as plt
+
+                counts = pd.Series(class_counter)
+
+                fig, ax = plt.subplots(figsize=(8,4))
+
+                ax.bar(counts.index, counts.values)
+
+                ax.set_ylim(bottom=0)
+
+                ax.set_xlabel("Loại phương tiện")
+                ax.set_ylabel("Số lượt")
+
+                for i,v in enumerate(counts.values):
+                    ax.text(i,v+0.2,str(v),ha="center")
+
+                st.pyplot(fig)
 
             with open(out_path, "rb") as f:
                 st.download_button(
