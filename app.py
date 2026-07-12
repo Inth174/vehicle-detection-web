@@ -183,7 +183,7 @@ allowed_direction = "DOWN"
 
 if mode == "Video":
     tracker_type = st.sidebar.selectbox(
-        "Thuật toán tracking", ["deepsort", "bytetrack"], index=0
+        "Thuật toán tracking", ["DeepSort", "ByteTrack"], index=0
     )
     allowed_direction = st.sidebar.selectbox(
         "Hướng di chuyển hợp lệ (phát hiện đi ngược chiều)",
