@@ -39,9 +39,26 @@ st.set_page_config(
 ROOT_DIR = Path(__file__).resolve().parent
 MODELS_DIR = ROOT_DIR / "models"
 
+# Temp folder INSIDE the project (cross-platform, avoids hardcoded
+# Linux-only "/tmp/" which does not exist on Windows).
 TEMP_DIR = ROOT_DIR / "temp_outputs"
 TEMP_DIR.mkdir(parents=True, exist_ok=True)
 
+
+# --------------------------------------------------------------
+# Google Drive model config
+# --------------------------------------------------------------
+# Model .pt nặng hơn 100MB nên không đưa lên GitHub được -> lưu trên
+# Google Drive (chế độ chia sẻ "Anyone with the link") và tự động tải
+# về khi app khởi chạy nếu máy chưa có sẵn file.
+#
+# Cách lấy FILE ID: mở link chia sẻ Drive, nó có dạng:
+#   https://drive.google.com/file/d/1AbCdEfGhIjKlMnOpQrStUvWxYz/view?usp=sharing
+# Phần ID chính là đoạn nằm giữa "/d/" và "/view":
+#   1AbCdEfGhIjKlMnOpQrStUvWxYz
+#
+# Điền tên file model (đúng như tên sẽ dùng trong models/) và ID
+# tương ứng vào dict bên dưới. Có thể khai báo nhiều model.
 GDRIVE_MODELS = {
     "TN1_best.pt": "1_KDzlkU0Xk8VRvZXEQERWYay8OiFDvd1",
     "TN3_best.pt": "1wrQxiesfCSnJGQh-RF3CzizY5vdIADxi",
@@ -235,19 +252,56 @@ if mode == "Ảnh":
         st.subheader("📋 Chi tiết các đối tượng phát hiện")
 
         if result["detections"]:
-            df = pd.DataFrame([
-                {
-                    "STT": i + 1,
-                    "Loại phương tiện": det["class_name"],
-                    "Độ tin cậy": round(det["confidence"], 3),
-                    "BBox (x1, y1, x2, y2)": det["bbox"],
-                }
-                for i, det in enumerate(result["detections"])
-            ])
-            st.dataframe(df, use_container_width=True, hide_index=True)
+            # ==========================
+                    # DataFrame hiển thị
+                    # ==========================
+                    df = pd.DataFrame([
+                        {
+                            "STT": i + 1,
+                            "Loại phương tiện": det["class_name"],
+                            "Độ tin cậy": f"{det['confidence'] * 100:.1f}%",
+                        }
+                        for i, det in enumerate(result["detections"])
+                    ])
 
-            st.subheader("📊 Thống kê theo loại phương tiện")
-            st.bar_chart(df["Loại phương tiện"].value_counts())
+                    st.dataframe(
+                        df,
+                        use_container_width=True,
+                        hide_index=True,
+                    )
+
+                    # ==========================
+                    # Tổng số phương tiện
+                    # ==========================
+                    st.metric(
+                        label="🚗 Tổng số phương tiện",
+                        value=len(df)
+                    )
+
+                    # ==========================
+                    # Thống kê theo class UA-DETRAC
+                    # ==========================
+                    counts = df["Loại phương tiện"].value_counts()
+
+                    st.write("Class phát hiện được:")
+                    st.write(df["Loại phương tiện"].unique())
+
+                    import matplotlib.pyplot as plt
+
+                    fig, ax = plt.subplots(figsize=(8,4))
+
+                    ax.bar(counts.index, counts.values)
+
+                    ax.set_ylim(0, max(counts.values) + 1)
+
+                    ax.set_xlabel("Loại phương tiện")
+                    ax.set_ylabel("Số lượng")
+                    ax.set_title("Số lượng phương tiện theo loại")
+
+                    for i, v in enumerate(counts.values):
+                        ax.text(i, v + 0.05, str(v), ha="center")
+
+                    st.pyplot(fig)
         else:
             st.info("Không phát hiện được phương tiện nào trong ảnh này.")
 
